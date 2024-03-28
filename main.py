@@ -15,7 +15,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #Image folder path
-base_path = '/home/ameya/Projects/Offside_Detection_Final/Offside/pose_estimation/image_data/filtered_images/'
+base_path = './Offside_detection_dataset/Offside_Images/'
 tempFileNames = os.listdir(base_path)
 fileNames = []
 for fileName in tempFileNames:
