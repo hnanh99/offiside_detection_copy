@@ -17,9 +17,11 @@ warnings.filterwarnings("ignore")
 #Image folder path
 base_path = './Offside_detection_dataset/Offside_Images/'
 tempFileNames = os.listdir(base_path)
+print(tempFileNames)
 fileNames = []
 for fileName in tempFileNames:
 	fileNames.append(base_path+str(fileName))
+	print(base_path+str(fileName))
 
 #Output image paths
 vanishing_point_viz_base_path = base_path+'vp/'
@@ -36,6 +38,7 @@ referee = [8.72783130847647e-06, 1.5868784197229944e-07, 0.0, 0.0010298840944002
 
 for file_itr in range(len(fileNames)):
 	print('\n\n', fileNames[file_itr])
+	print('in for loop')
 	# calculate vanishing points
 	imageForVanishingPoints = cv2.imread(fileNames[file_itr])
 	vertical_vanishing_point = get_vertical_vanishing_point(imageForVanishingPoints, goalDirection)
@@ -66,6 +69,9 @@ for file_itr in range(len(fileNames)):
 		font = cv2.FONT_HERSHEY_SIMPLEX
 		cv2.putText(imageForTeams, str(pose[1]), (int(pose[-2][-1]), int(pose[-2][0])), font, 1, (200,255,155), 2, cv2.LINE_AA)
 	cv2.imwrite(team_classification_viz_base_path+tempFileNames[file_itr], imageForTeams)
+	print('cv in line 72')
+	print(team_classification_viz_base_path+tempFileNames[file_itr])
+	print(imageForTeams)
 	# get offside decisions
 	pose_estimations, last_defending_man = get_offside_decision(pose_estimations, vertical_vanishing_point, 0, 1, isKeeperFound)
 	# pose_estimations structure -> [id, teamId, keyPoints, leftmostPoint, angleAtVanishingPoint, offsideDecision]
@@ -94,6 +100,9 @@ for file_itr in range(len(fileNames)):
 			cv2.putText(imageForOffside, 'ref', (int(pose[-3][-1]), int(pose[-3][0]-10)), font, 1, (200,255,155), 2, cv2.LINE_AA)
 			cv2.line(imageForOffside , (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-3][-1]), int(pose[-3][0])), (0,255,0) , 2 )
 	cv2.imwrite(offside_viz_base_path+tempFileNames[file_itr][:-4]+'_1.jpg', imageForOffside)
+	print('cv in line 103')
+	print(offside_viz_base_path+tempFileNames[file_itr][:-4]+'_1.jpg')
+	print(imageForOffside)
 	# exchange attacking and defending teams, get offside decisions
 	pose_estimations, last_defending_man = get_offside_decision(pose_estimations, vertical_vanishing_point, 1, 0, isKeeperFound)
 	# pose_estimations structure -> [id, teamId, keyPoints, leftmostPoint, angleAtVanishingPoint, offsideDecision]
@@ -121,5 +130,7 @@ for file_itr in range(len(fileNames)):
 			cv2.putText(imageForOffside, 'ref', (int(pose[-3][-1]), int(pose[-3][0]-10)), font, 1, (200,255,155), 2, cv2.LINE_AA)
 			cv2.line(imageForOffside , (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-3][-1]), int(pose[-3][0])), (0,255,0) , 2 )
 	cv2.imwrite(offside_viz_base_path+tempFileNames[file_itr][:-4]+'_2.jpg', imageForOffside)
-
+	print('cv in line 133')
+	print(offside_viz_base_path+tempFileNames[file_itr][:-4]+'_2.jpg')
+	print(imageForOffside)
 	print(file_itr,fileNames[file_itr])
