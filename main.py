@@ -16,6 +16,7 @@ warnings.filterwarnings("ignore")
 
 #Image folder path
 base_path = './Offside_detection_dataset/Offside_Images/'
+result_path = './Offside_detection_dataset/results/'
 tempFileNames = os.listdir(base_path)
 print(tempFileNames)
 fileNames = []
@@ -24,10 +25,10 @@ for fileName in tempFileNames:
 	print(base_path+str(fileName))
 
 #Output image paths
-vanishing_point_viz_base_path = base_path+'vp/'
-pose_estimation_viz_base_path = base_path+'pe/'
-team_classification_viz_base_path = base_path+'tc/'
-offside_viz_base_path = base_path+'final/'
+vanishing_point_viz_base_path = result_path+'vp/'
+pose_estimation_viz_base_path = result_path+'pe/'
+team_classification_viz_base_path = result_path+'tc/'
+offside_viz_base_path = result_path+'final/'
 
 #Direction of goal
 goalDirection = 'right'
