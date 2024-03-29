@@ -25,6 +25,7 @@ for fileName in tempFileNames:
 	print(base_path+str(fileName))
 
 #Output image paths
+temp_viz_base_path = result_path+'sub/'
 vanishing_point_viz_base_path = result_path+'vp/'
 pose_estimation_viz_base_path = result_path+'pe/'
 team_classification_viz_base_path = result_path+'tc/'
@@ -44,13 +45,13 @@ for file_itr in range(len(fileNames)):
 	imageForVanishingPoints = cv2.imread(fileNames[file_itr])
 	vertical_vanishing_point = get_vertical_vanishing_point(imageForVanishingPoints, goalDirection)
 	horizontal_vanishing_point = get_horizontal_vanishing_point(imageForVanishingPoints)
-	# cv2.imwrite(vanishing_point_viz_base_path+tempFileNames[file_itr], imageForVanishingPoints)
+	cv2.imwrite(vanishing_point_viz_base_path+tempFileNames[file_itr], imageForVanishingPoints)
 	print('Finished Vanishing Point calculation')
 	# get pose estimaitons and team classifications
 	imageForPoseEstimation = cv2.imread(fileNames[file_itr])
 	imageForPoseEstimation_2 = imread(fileNames[file_itr], mode='RGB')
 	pose_estimations, isKeeperFound, isRefFound, temp_image = PoseGetter.return_pose(imageForPoseEstimation_2, imageForPoseEstimation, keeper, referee)
-	cv2.imwrite(base_path+'sub/'+tempFileNames[file_itr], temp_image)
+	cv2.imwrite(temp_viz_base_path+tempFileNames[file_itr], temp_image)
 	pose_estimations = sorted(pose_estimations, key=lambda x : x[-1][0])
 	pose_estimations = update_pose_left_most_point(vertical_vanishing_point, horizontal_vanishing_point, pose_estimations, imageForPoseEstimation, goalDirection)
 	print('Finished Pose Estimation & Team Classifiaciton')
@@ -63,7 +64,7 @@ for file_itr in range(len(fileNames)):
 	for pose in pose_estimations:
 		cv2.putText(imageForPoseEstimation, str(str(pose[0])), (int(pose[-2][-1]), int(pose[-2][0])), font, 1, (200,255,155), 2, cv2.LINE_AA)
 		cv2.line(imageForPoseEstimation, (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-2][-1]), int(pose[-2][0])), (0,255,0) , 2 )
-	# cv2.imwrite(pose_estimation_viz_base_path+tempFileNames[file_itr], imageForPoseEstimation)
+	cv2.imwrite(pose_estimation_viz_base_path+tempFileNames[file_itr], imageForPoseEstimation)
 	# visualize teams
 	imageForTeams = cv2.imread(fileNames[file_itr])
 	for pose in pose_estimations:
