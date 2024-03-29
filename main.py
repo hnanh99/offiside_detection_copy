@@ -19,7 +19,7 @@ base_path = './Offside_detection_dataset/Offside_Images/'
 tempFileNames = os.listdir(base_path)
 fileNames = []
 for fileName in tempFileNames:
-    fileNames.append(base_path+str(fileName))
+	fileNames.append(base_path+str(fileName))
 
 #Output image paths
 vanishing_point_viz_base_path = base_path+'vp/'
@@ -63,8 +63,8 @@ for file_itr in range(len(fileNames)):
 	# visualize teams
 	imageForTeams = cv2.imread(fileNames[file_itr])
 	for pose in pose_estimations:
-	    font = cv2.FONT_HERSHEY_SIMPLEX
-	    cv2.putText(imageForTeams, str(pose[1]), (int(pose[-2][-1]), int(pose[-2][0])), font, 1, (200,255,155), 2, cv2.LINE_AA)
+		font = cv2.FONT_HERSHEY_SIMPLEX
+		cv2.putText(imageForTeams, str(pose[1]), (int(pose[-2][-1]), int(pose[-2][0])), font, 1, (200,255,155), 2, cv2.LINE_AA)
 	cv2.imwrite(team_classification_viz_base_path+tempFileNames[file_itr], imageForTeams)
 	# get offside decisions
 	pose_estimations, last_defending_man = get_offside_decision(pose_estimations, vertical_vanishing_point, 0, 1, isKeeperFound)
@@ -99,27 +99,27 @@ for file_itr in range(len(fileNames)):
 	# pose_estimations structure -> [id, teamId, keyPoints, leftmostPoint, angleAtVanishingPoint, offsideDecision]
 	imageForOffside = cv2.imread(fileNames[file_itr])
 	for pose in pose_estimations:
-	    if pose[1] == 1:
-	        if pose[-1] == 'off':
-	            font = cv2.FONT_HERSHEY_SIMPLEX
-	            cv2.putText(imageForOffside, 'off', (int(pose[-3][-1]), int(pose[-3][0]-10)), font, 1, (200,255,155), 2, cv2.LINE_AA)
-	            cv2.line(imageForOffside , (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-3][-1]), int(pose[-3][0])), (0,255,0) , 2 )
-	        else:
-	            font = cv2.FONT_HERSHEY_SIMPLEX
-	            cv2.putText(imageForOffside, 'on', (int(pose[-3][-1]), int(pose[-3][0]-10)), font, 1, (200,255,155), 2, cv2.LINE_AA)
-	    elif pose[1] == 0:
-	        if pose[0] == last_defending_man:
-	            cv2.putText(imageForOffside, 'last man', (int(pose[-3][-1]), int(pose[-3][0]-15)), font, 1, (200,255,155), 2, cv2.LINE_AA)
-	            cv2.line(imageForOffside , (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-3][-1]), int(pose[-3][0])), (0,255,0) , 2 )
-	        else:
-	            cv2.putText(imageForOffside, 'def', (int(pose[-3][-1]), int(pose[-3][0]-15)), font, 1, (200,255,155), 2, cv2.LINE_AA)
-	            cv2.line(imageForOffside , (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-3][-1]), int(pose[-3][0])), (0,255,0) , 2 )
-	    elif pose[1] == 2:
-		    cv2.putText(imageForOffside, 'keep', (int(pose[-3][-1]), int(pose[-3][0]-10)), font, 1, (200,255,155), 2, cv2.LINE_AA)
-		    cv2.line(imageForOffside , (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-3][-1]), int(pose[-3][0])), (0,255,0) , 2 )
-	    elif pose[1] == 3:
-		    cv2.putText(imageForOffside, 'ref', (int(pose[-3][-1]), int(pose[-3][0]-10)), font, 1, (200,255,155), 2, cv2.LINE_AA)
-		    cv2.line(imageForOffside , (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-3][-1]), int(pose[-3][0])), (0,255,0) , 2 )
+		if pose[1] == 1:
+			if pose[-1] == 'off':
+				font = cv2.FONT_HERSHEY_SIMPLEX
+				cv2.putText(imageForOffside, 'off', (int(pose[-3][-1]), int(pose[-3][0]-10)), font, 1, (200,255,155), 2, cv2.LINE_AA)
+				cv2.line(imageForOffside , (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-3][-1]), int(pose[-3][0])), (0,255,0) , 2 )
+			else:
+				font = cv2.FONT_HERSHEY_SIMPLEX
+				cv2.putText(imageForOffside, 'on', (int(pose[-3][-1]), int(pose[-3][0]-10)), font, 1, (200,255,155), 2, cv2.LINE_AA)
+		elif pose[1] == 0:
+			if pose[0] == last_defending_man:
+				cv2.putText(imageForOffside, 'last man', (int(pose[-3][-1]), int(pose[-3][0]-15)), font, 1, (200,255,155), 2, cv2.LINE_AA)
+				cv2.line(imageForOffside , (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-3][-1]), int(pose[-3][0])), (0,255,0) , 2 )
+			else:
+				cv2.putText(imageForOffside, 'def', (int(pose[-3][-1]), int(pose[-3][0]-15)), font, 1, (200,255,155), 2, cv2.LINE_AA)
+				cv2.line(imageForOffside , (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-3][-1]), int(pose[-3][0])), (0,255,0) , 2 )
+		elif pose[1] == 2:
+			cv2.putText(imageForOffside, 'keep', (int(pose[-3][-1]), int(pose[-3][0]-10)), font, 1, (200,255,155), 2, cv2.LINE_AA)
+			cv2.line(imageForOffside , (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-3][-1]), int(pose[-3][0])), (0,255,0) , 2 )
+		elif pose[1] == 3:
+			cv2.putText(imageForOffside, 'ref', (int(pose[-3][-1]), int(pose[-3][0]-10)), font, 1, (200,255,155), 2, cv2.LINE_AA)
+			cv2.line(imageForOffside , (int(vertical_vanishing_point[0]) , int(vertical_vanishing_point[1])) , (int(pose[-3][-1]), int(pose[-3][0])), (0,255,0) , 2 )
 	cv2.imwrite(offside_viz_base_path+tempFileNames[file_itr][:-4]+'_2.jpg', imageForOffside)
 
 	print(file_itr,fileNames[file_itr])
