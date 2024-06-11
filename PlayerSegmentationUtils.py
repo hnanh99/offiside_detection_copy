@@ -61,7 +61,9 @@ def iou(box1,box2):
 def get_contours(image):
 
     hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+    cv2.imwrite('hsv.jpg',hsv)
     mask = cv2.inRange(hsv, lower_green, upper_green)
+    cv2.imwrite('mask.jpg',mask)
     res = cv2.bitwise_and(image, image, mask=mask)
     res_bgr = cv2.cvtColor(res,cv2.COLOR_HSV2BGR)
     res_gray = cv2.cvtColor(res,cv2.COLOR_BGR2GRAY)
