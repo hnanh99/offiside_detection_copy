@@ -140,6 +140,9 @@ def return_pose(image, image2, keeper, referee):
     allTeamClassificationFeatures = []
     allTeamClassificationFeaturesDBSCAN = []
 
+    # Tạo một ảnh trắng để vẽ khung xương của tất cả cầu thủ
+    skeleton_image = np.zeros((image2.shape[0], image2.shape[1], 3), dtype=np.uint8)
+
     for i in range(len(person_conf_multi)):
         x = 0
         player_parts = {}
@@ -237,8 +240,8 @@ def return_pose(image, image2, keeper, referee):
             allColorsDBSCAN = image2[allXCoords[0]:allXCoords[-1], allYCoords[0]:allYCoords[-1]]
             image = cv2.rectangle(image, (newYLower, newXLower), (newYUpper, newXUpper), (255, 0, 0), 1)
             
-            # Lưu khung xương của cầu thủ thành hình ảnh
-            save_skeleton_frame(allXCoords, allYCoords, f"skeleton_frame_player_{i}.jpg",image2)
+            # Vẽ khung xương của cầu thủ lên ảnh tổng
+            draw_skeleton(skeleton_image, allXCoords, allYCoords)
             
             chans = cv2.split(allColors)
             colors = ("b", "g", "r")
@@ -282,8 +285,8 @@ def return_pose(image, image2, keeper, referee):
             allColorsDBSCAN = image2[allXCoords[0]:allXCoords[-1], allYCoords[0]:allYCoords[-1]]
             image = cv2.rectangle(image, (newYLower, newXLower), (newYUpper, newXUpper), (255, 0, 0), 1)
             
-            # Lưu khung xương của cầu thủ thành hình ảnh
-            save_skeleton_frame(allXCoords, allYCoords, f"skeleton_frame_player_{i}.jpg",image2)
+            # Vẽ khung xương của cầu thủ lên ảnh tổng
+            draw_skeleton(skeleton_image, allXCoords, allYCoords)
             
             chans = cv2.split(allColors)
             colors = ("b", "g", "r")
@@ -321,8 +324,8 @@ def return_pose(image, image2, keeper, referee):
             allColorsDBSCAN = image2[allXCoords[0]:allXCoords[1], allYCoords[0]:allYCoords[1]]
             image = cv2.rectangle(image, (allYCoords[0], int(allXCoords[0] + abs(allXCoords[1] - allXCoords[0]) * 0.35)), (allYCoords[1], allXCoords[1]), (255, 0, 0), 1)
             
-            # Lưu khung xương của cầu thủ thành hình ảnh
-            save_skeleton_frame(allXCoords, allYCoords, f"skeleton_frame_player_{i}.jpg",image2)
+            # Vẽ khung xương của cầu thủ lên ảnh tổng
+            draw_skeleton(skeleton_image, allXCoords, allYCoords)
             
             chans = cv2.split(allColors)
             colors = ("b", "g", "r")
@@ -366,14 +369,12 @@ def return_pose(image, image2, keeper, referee):
             all_info[player_itr][1] = teamLabels[player_itr]
 
     print("ref:", ref_ids, "keeper:", keeper_id, "score", team_class_num)
+    
+    # Lưu ảnh tổng có tất cả khung xương
+    cv2.imwrite('all_skeletons.jpg', skeleton_image)
 
     return all_info, isKeeperFound, isRefFound, image
 
-def save_skeleton_frame(allXCoords, allYCoords, output_path,image2):
-    skeleton_image = np.zeros((image2.shape[0], image2.shape[1], 3), dtype=np.uint8)
-    for i in range(len(allXCoords)):
-        if i < len(allXCoords) - 1:
-            cv2.line(skeleton_image, (allYCoords[i], allXCoords[i]), (allYCoords[i + 1], allXCoords[i + 1]), (255, 0, 0), 2)
-    cv2.imwrite(output_path, skeleton_image)
-
-
+def draw_skeleton(skeleton_image, allXCoords, allYCoords):
+    for i in range(len(allXCoords) - 1):
+        cv2.line(skeleton_image, (allYCoords[i], allXCoords[i]), (allYCoords[i + 1], allXCoords[i + 1]), (255, 0, 0), 2)
