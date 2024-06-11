@@ -1,68 +1,55 @@
-# Computer Vision based Offside Detection in soccer
+# Phát hiện việt vị trong bóng đá sử dụng Thị giác máy tính
 
-## Paper Details
+- [Phát hiện việt vị trong bóng đá sử dụng Thị giác máy tính](#phát-hiện-việt-vị-trong-bóng-đá-sử-dụng-thị-giác-máy-tính)
+  - [Thành viên nhóm:](#thành-viên-nhóm)
+  - [Mô tả:](#mô-tả)
+  - [Giải thuật](#giải-thuật)
+  - [Run bằng Google Colab](#run-bằng-google-colab)
+  - [Run](#run)
+  - [Tài liệu tham khảo:](#tài-liệu-tham-khảo)
+## Thành viên nhóm:
+|STT|Tên|MSSV|
+|---|---|---|
+| 1  |Đoàn Thế Lên|106200233|
+| 2  |Lê Minh Nhật|106200238|
+| 3  |Huỳnh Nhật Ánh|106200252|
 
-### Link :  https://doi.org/10.1145/3422844.3423055
+## Mô tả:
+Phát hiện việt vị là một phần quan trọng trong mỗi trận đấu bóng đá, nhưng việc ra quyết định vẫn gặp nhiều thách thức ngay cả khi đã có sự hỗ trợ của Trợ lý Trọng tài Video (VAR). Công nghệ Thị giác Máy tính mở ra một hướng tiếp cận mới đầy tiềm năng để tự động hóa quá trình này, giảm thiểu lỗi do con người và rút ngắn thời gian chờ đợi. Tuy nhiên, vẫn còn khó khăn trong việc thiết lập các giải thuật toàn diện, phương pháp tính toán chính xác cho các cảnh và tập dữ liệu đa dạng để kiểm tra là những trở ngại lớn. Đề tài này tập trung vào việc phát triển và đánh giá thuật toán quyết định việt vị dựa trên Thị giác Máy tính, đồng thời cung cấp một tập dữ liệu mới và phương pháp tiếp cận định lượng nhằm thúc đẩy nghiên cứu trong lĩnh vực này.
 
-### Citation:
-```
-@inproceedings{
-  10.1145/3422844.3423055,
-  author = {Panse, Neeraj and Mahabaleshwarkar, Ameya},
-  title = {A Dataset & Methodology for Computer Vision Based Offside Detection in Soccer},
-  year = {2020},
-  isbn = {9781450381499},
-  publisher = {Association for Computing Machinery},
-  address = {New York, NY, USA},
-  url = {https://doi.org/10.1145/3422844.3423055},
-  doi = {10.1145/3422844.3423055},
-  series = {MMSports '20}
-}
-```
+![](images/25_or.jpg)
+*Hình 1. Có thể nhận thấy trong trận đấu, cầu thủ đang tấn công (áo xanh) đang phạm lỗi việt vị*
 
-Offside decisions are an integral part of every soccer game. In recent times, decision-making in soccer games, including offside decisions, has been heavily influenced by technology. However, in spite of the use of a Video Assistant Referee (VAR), offside decisions remain to be plagued with inconsistencies. The two major points of criticism for the VAR have been extensive delays in providing final decisions and inaccurate decisions arising from human errors. The visual nature of offside decision-making makes Computer Vision techniques a viable option for tackling these issues, by automating appropriate aspects of the process. This repo is an extention of the above research and can be used for predicting players in an offside position, given an image of a specific scene in a soccer match.
-
-
-![](images/OG.jpg)
-*In this scenario, Lionel Messi(Jersey no. 10) has the ball, while two other players from his team are in a clear offside position*
-
-## Brief description of the algorithm
+## Giải thuật
 
 
-1. Finding the vertical vanishing lines and vanishing point using the markings on the field to determine the relative position of all the players with respect to the field.
+1. Tìm điểm biến mất(Vanishing point) dựa vào vạch giữa sân và ranh giới khu vực phạt đền
+2. Phát hiện các cầu thủ trong sân và các điểm bộ phận cơ thể
+3. Xác định đội của các cầu thử dựa vào xử lý ảnh
 
-2. Finding the farthest horizontal projection of the playable body parts of all players(necessary for the offside rule)
-
-![](images/VP.jpg)
-*The vertical vanishing lines(depicted in red) drawn from a single vertical vanishing line. Relative positions of all players from the vanishing point(green) and projection of their farthest body part (blue)*
-
-3. Classifying the people on the field into Team1, Team2 and the Goalkeeper by clustering their jersey colours.
-
-![](images/TC.jpg)
-*All players and the goalkeeper have been classified into their respective categories. [0 : TEAM-A, 1 : TEAM-B]*
+![](images/25_tc.jpg)
+*Hình 2. Phân loại các cầu thủ trong sân với 0 là team A và 1 là team B*
 
 
-4. Finding all players in an offside position using the novel computation algorithm defined in the paper.
+4. Vẽ hình chiếu của bộ phận xa nhất của các cầu thủ và kết nối với các điểm biến mất ngang (Horizontal vanishing point)
+5. Phát hiện việt vị dựa vào so sánh góc của cầu thủ phòng ngự cuối cùng và cầu thủ tấn công
 
-![](images/Off.jpg)
-*All attacking team players classified as OFF or ON based on their location. The last man of the defending team is highlighted as well*
+![](images/25_1_final.jpg)
+*Các cầu thủ tấn công được gán nhãn ON hoặc OFF với OFF là cầu thủ đang phạm lỗi việt vị Cầu thủ phòng ngự cuối được gán nhãn last man*
+## Run bằng Google Colab
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](....)
 
-
-## Steps to run the system
-
-1. Create the conda environment using the yml file. Note that some of the dependancies might be from the time when the code was written and might need an upgrade.
+## Run
+1. Sử dụng môi trường Conda để cài đặt các package cần thiết.
 
     ```conda env create -f environment. yml```
 
-2. Download the models for pose estimation from the link given below.
-
-3. Configure and run  ```main.py``` with output folders for the intermediate results. The output images will be generated in the configured folders.
+2. Chạy file  ```main.py```. Kết quả đầu ra xuất hiện trong folder hình ảnh kết quả.
 
     ``` python3 main.py ```
 
 
-## Artifacts
-
-Dataset : [Drive Link](https://drive.google.com/drive/folders/1TgxT-9GRB3BWice_5WHuCQ4Byev-NHFI?usp=sharing)
-
-Models : [Drive Link](https://drive.google.com/drive/folders/1DW0G-zgLs3g_rf3QnWQGjQ7euCJPaOs3?usp=sharing)
+## Tài liệu tham khảo:
+[A Dataset & Methodology for Computer Vision based Offside Detection in Soccer](https://dl.acm.org/doi/10.1145/3422844.3423055)
+[Dataset](https://drive.google.com/drive/folders/1TgxT-9GRB3BWice_5WHuCQ4Byev-NHFI?usp=sharing)
+[Models](https://drive.google.com/drive/folders/1DW0G-zgLs3g_rf3QnWQGjQ7euCJPaOs3?usp=sharing)
