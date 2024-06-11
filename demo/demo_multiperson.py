@@ -113,258 +113,268 @@ def bresenham_march(img, p1, p2):
         ret.reverse()
     return ret
 
-def return_pose(image , image2 , keeper , referee):
-	
-	keeper_id = -1
-	ref_ids= []
-	
-	team_class_num = 0.25 # sys.maxsize
-	ref_num = 0.10
-	
-	contours, mask = get_contours(image)
+def return_pose(image, image2, keeper, referee):
+    
+    keeper_id = -1
+    ref_ids = []
+    team_class_num = 0.25  # sys.maxsize
+    ref_num = 0.10
 
-		
-	all_info = []
+    contours, mask = get_contours(image)
 
-	image_batch = data_to_input(image)
+    all_info = []
 
-	# Compute prediction with the CNN
-	outputs_np = sess.run(outputs, feed_dict={inputs: image_batch})
-	scmap, locref, pairwise_diff = predict.extract_cnn_output(outputs_np, cfg, dataset.pairwise_stats)
+    image_batch = data_to_input(image)
 
-	detections = extract_detections(cfg, scmap, locref, pairwise_diff)
-	unLab, pos_array, unary_array, pwidx_array, pw_array = eval_graph(sm, detections)
-	person_conf_multi = get_person_conf_multicut(sm, unLab, unary_array, pos_array)
-	cv2.imwrite('person_conf_multi.jpg', person_conf_multi)
+    # Compute prediction with the CNN
+    outputs_np = sess.run(outputs, feed_dict={inputs: image_batch})
+    scmap, locref, pairwise_diff = predict.extract_cnn_output(outputs_np, cfg, dataset.pairwise_stats)
 
-	cl = [(255,0,0),(0,0,255),(0,255,0),(255,255,0),(0,255,255),(255,0,255),(0,0,0)]
+    detections = extract_detections(cfg, scmap, locref, pairwise_diff)
+    unLab, pos_array, unary_array, pwidx_array, pw_array = eval_graph(sm, detections)
+    person_conf_multi = get_person_conf_multicut(sm, unLab, unary_array, pos_array)
+    cv2.imwrite('person_conf_multi.jpg', person_conf_multi)
 
-	names = {6:'rightShoulder', 5:'leftShoulder', 11:'leftHip', 12:'rightHip',14:'rightKnee',13:'leftKnee',16:'rightAnkle',15:'leftAnkle'}	
+    names = {6: 'rightShoulder', 5: 'leftShoulder', 11: 'leftHip', 12: 'rightHip',
+             14: 'rightKnee', 13: 'leftKnee', 16: 'rightAnkle', 15: 'leftAnkle'}
 
-	allTeamClassificationFeatures = []
-	allTeamClassificationFeaturesDBSCAN = []
-	
-	# TODO - Use mid-back to knee features
-	for i in range(len(person_conf_multi)):
-		
-		x = 0
-		player_parts = {}
-		min_x = image2.shape[0] - 1
-		min_y = image2.shape[1] - 1
+    allTeamClassificationFeatures = []
+    allTeamClassificationFeaturesDBSCAN = []
 
-		for j in range(17):
-			
-			printFlag = True
-			if j in [5, 6, 15, 16, 11, 12, 13, 14]:
-				ptsy, ptsx = person_conf_multi[i,j,:]
+    for i in range(len(person_conf_multi)):
+        x = 0
+        player_parts = {}
+        min_x = image2.shape[0] - 1
+        min_y = image2.shape[1] - 1
 
-				if ptsy > 0.0 and ptsx > 0.0:
-					player_parts.update({names[j] : {'x' : ptsx , 'y' :ptsy} })
-					x = x + 1
-					
-					if min_x > ptsx:
-						min_x = ptsx
-						min_y = ptsy
-		    
-		teamClassificationFeatures = []
-		teamClassificationFeaturesDBSCAN = []
-		
-		allXCoords = []
-		allYCoords = []
+        for j in range(17):
+            if j in [5, 6, 15, 16, 11, 12, 13, 14]:
+                ptsy, ptsx = person_conf_multi[i, j, :]
 
-		leftUpperPointFound = False
-		rightUpperPointFound = False
-		leftLowerPointFound = False
-		rightLowerPointFound = False
-		hipPointsFound = False
-		
-		if 'rightShoulder' in list(player_parts.keys()):
-			allXCoords.append(int(player_parts['rightShoulder']['x']))
-			allYCoords.append(int(player_parts['rightShoulder']['y']))
-			rightUpperPointFound = True
-		if 'leftShoulder' in list(player_parts.keys()):
-			allXCoords.append(int(player_parts['leftShoulder']['x']))
-			allYCoords.append(int(player_parts['leftShoulder']['y']))
-			leftUpperPointFound = True
+                if ptsy > 0.0 and ptsx > 0.0:
+                    player_parts.update({names[j]: {'x': ptsx, 'y': ptsy}})
+                    x += 1
 
-		if 'rightKnee' in list(player_parts.keys()):
-			allXCoords.append(int(player_parts['rightKnee']['x']))
-			allYCoords.append(int(player_parts['rightKnee']['y']))
-			rightLowerPointFound = True		
-		if 'leftKnee' in list(player_parts.keys()):
-			allXCoords.append(int(player_parts['leftKnee']['x']))
-			allYCoords.append(int(player_parts['leftKnee']['y']))
-			leftLowerPointFound = True
+                    if min_x > ptsx:
+                        min_x = ptsx
+                        min_y = ptsy
 
-		allXCoords.sort()
-		allYCoords.sort()
-			
-		if len(allXCoords) < 3:
-			continue
+        teamClassificationFeatures = []
+        teamClassificationFeaturesDBSCAN = []
 
-		hipPointsFound = 'rightHip' in list(player_parts.keys()) and 'leftHip' in list(player_parts.keys())
-		if hipPointsFound:
-			hipPointsFound &= abs(int(player_parts['leftHip']['y']) - int(player_parts['rightHip']['y'])) > 5
-		if hipPointsFound:
-			allHipXCoords = []
-			allHipYCoords = []
-			allHipXCoords.append(int(player_parts['rightHip']['x']))
-			allHipYCoords.append(int(player_parts['rightHip']['y']))
-			allHipXCoords.append(int(player_parts['leftHip']['x'])) 
-			allHipYCoords.append(int(player_parts['leftHip']['y']))
-			allHipXCoords.sort()
-			allHipYCoords.sort()
-		
-		if mask[int(min_x) , int(min_y)] == 0:
-			continue
+        allXCoords = []
+        allYCoords = []
 
-		if len(allXCoords) == 4:
-			if 0 > allXCoords[0]:
-				allXCoords[0] = 0
-			if 0 > allXCoords[3]:
-				allXCoords[3] = 0
-			if 0 > allXCoords[0] and 0 > allXCoords[3]:
-				allXCoords[3] = 2
-			if 0 > allYCoords[0]:
-				allYCoords[0] = 0
-			if 0 > allYCoords[3]:
-				allYCoords[3] = 0
-			if 0 > allYCoords[0] and 0 > allYCoords[3]:
-				allYCoords[3] = 2 
-			allXCoords.sort()
-			allYCoords.sort() 
-			newXLower = int(allXCoords[0]+abs(allXCoords[3]-allXCoords[0])*0.4)
-			newXUpper = int(allXCoords[3]-abs(allXCoords[3]-allXCoords[0])*0.2)
-			if hipPointsFound:
-				newYLower = int(allHipYCoords[0])
-				newYUpper = int(allHipYCoords[-1])
-			else:
-				newYLower = int(allYCoords[0])
-				newYUpper = int(allYCoords[3]) 
-			allColors = image2[newXLower:newXUpper, newYLower:newYUpper]
-			allColorsDBSCAN = image2[allXCoords[0]:allXCoords[-1], allYCoords[0]:allYCoords[-1]]
-			image = cv2.rectangle(image, (newYLower, newXLower), (newYUpper, newXUpper), (255, 0, 0), 1)
-			chans = cv2.split(allColors)
-			colors = ("b", "g", "r")
-			for (chan, color) in zip(chans, colors):
-				hist = cv2.calcHist([chan], [0], None, [64], [0, 256])
-				teamClassificationFeatures.extend([np.int64(x[0]) for x in hist])
-				teamClassificationFeatures = [float(i)/max(teamClassificationFeatures) for i in teamClassificationFeatures]
-			allTeamClassificationFeatures.append(teamClassificationFeatures)
-			chans = cv2.split(allColorsDBSCAN)
-			colors = ("b", "g", "r")
-			for (chan, color) in zip(chans, colors):
-				hist = cv2.calcHist([chan], [0], None, [3], [0, 256])
-				teamClassificationFeaturesDBSCAN.extend([np.int64(x[0]) for x in hist])
-				teamClassificationFeaturesDBSCAN = [float(i)/max(teamClassificationFeaturesDBSCAN) for i in teamClassificationFeaturesDBSCAN]
-			allTeamClassificationFeaturesDBSCAN.append(teamClassificationFeaturesDBSCAN)
+        leftUpperPointFound = False
+        rightUpperPointFound = False
+        leftLowerPointFound = False
+        rightLowerPointFound = False
+        hipPointsFound = False
 
-		if len(allXCoords) == 3:
-			if 0 > allXCoords[0]:
-				allXCoords[0] = 0
-			if 0 > allXCoords[2]:
-				allXCoords[2] = 0
-			if 0 > allXCoords[0] and 0 > allXCoords[2]:
-				allXCoords[2] = 10 
-			if 0 > allYCoords[0]:
-				allYCoords[0] = 0
-			if 0 > allYCoords[2]:
-				allYCoords[2] = 0
-			if 0 > allYCoords[0] and 0 > allYCoords[2]:
-				allYCoords[2] = 10  
-			allXCoords.sort()
-			allYCoords.sort()
-			newXLower = int(allXCoords[0]+abs(allXCoords[2]-allXCoords[0])*0.4)
-			newXUpper = int(allXCoords[2]-abs(allXCoords[2]-allXCoords[0])*0.2)
-			if hipPointsFound:
-				newYLower = int(allHipYCoords[0])
-				newYUpper = int(allHipYCoords[-1])
-			else:
-				newYLower = int(allYCoords[0])
-				newYUpper = int(allYCoords[2])
-			allColors = image2[newXLower:newXUpper, newYLower:newYUpper]
-			allColorsDBSCAN = image2[allXCoords[0]:allXCoords[-1], allYCoords[0]:allYCoords[-1]]
-			image = cv2.rectangle(image, (newYLower, newXLower), (newYUpper, newXUpper), (255, 0, 0), 1)
-			chans = cv2.split(allColors)
-			colors = ("b", "g", "r")
-			for (chan, color) in zip(chans, colors):
-				hist = cv2.calcHist([chan], [0], None, [64], [0, 256])
-				teamClassificationFeatures.extend([np.int64(x[0]) for x in hist])
-				teamClassificationFeatures = [float(i)/max(teamClassificationFeatures) for i in teamClassificationFeatures]
-			allTeamClassificationFeatures.append(teamClassificationFeatures)
-			chans = cv2.split(allColorsDBSCAN)
-			colors = ("b", "g", "r")
-			for (chan, color) in zip(chans, colors):
-				hist = cv2.calcHist([chan], [0], None, [3], [0, 256])
-				teamClassificationFeaturesDBSCAN.extend([np.int64(x[0]) for x in hist])
-				teamClassificationFeaturesDBSCAN = [float(i)/max(teamClassificationFeaturesDBSCAN) for i in teamClassificationFeaturesDBSCAN]
-			allTeamClassificationFeaturesDBSCAN.append(teamClassificationFeaturesDBSCAN)
+        if 'rightShoulder' in list(player_parts.keys()):
+            allXCoords.append(int(player_parts['rightShoulder']['x']))
+            allYCoords.append(int(player_parts['rightShoulder']['y']))
+            rightUpperPointFound = True
+        if 'leftShoulder' in list(player_parts.keys()):
+            allXCoords.append(int(player_parts['leftShoulder']['x']))
+            allYCoords.append(int(player_parts['leftShoulder']['y']))
+            leftUpperPointFound = True
 
-		if len(allXCoords) == 2:
-			# if (leftUpperPointFound and rightLowerPointFound) or (leftLowerPointFound and rightUpperPointFound):
-			if 0 > allXCoords[0]:
-				allXCoords[0] = 0
-			if 0 > allXCoords[1]:
-				allXCoords[1] = 0
-			if 0 > allXCoords[0] and 0 > allXCoords[1]:
-				allXCoords[1] = 2 
-			if 0 > allYCoords[0]:
-				allYCoords[0] = 0
-			if 0 > allYCoords[1]:
-				allYCoords[1] = 0
-			if 0 > allYCoords[0] and 0 > allYCoords[1]:
-				allYCoords[1] = 2
-			allXCoords.sort()
-			allYCoords.sort()
-			newXLower = int(allXCoords[0]+abs(allXCoords[1]-allXCoords[0])*0.35)
-			newXUpper = int(allXCoords[1]*0.9) 
-			allColors = image2[newXLower:newXUpper, allYCoords[0]:allYCoords[1]]
-			allColorsDBSCAN = image2[allXCoords[0]:allXCoords[1], allYCoords[0]:allYCoords[1]]
-			image = cv2.rectangle(image, (allYCoords[0], int(allXCoords[0]+abs(allXCoords[1]-allXCoords[0])*0.35)), (allYCoords[1], allXCoords[1]), (255, 0, 0), 1)
-			chans = cv2.split(allColors)
-			colors = ("b", "g", "r")
-			for (chan, color) in zip(chans, colors):
-				hist = cv2.calcHist([chan], [0], None, [3], [0, 256])
-				teamClassificationFeatures.extend([np.int64(x[0]) for x in hist])
-				teamClassificationFeatures = [float(i)/max(teamClassificationFeatures) for i in teamClassificationFeatures]
-			allTeamClassificationFeatures.append(teamClassificationFeatures)
-			chans = cv2.split(allColorsDBSCAN)
-			colors = ("b", "g", "r")
-			for (chan, color) in zip(chans, colors):
-				hist = cv2.calcHist([chan], [0], None, [3], [0, 256])
-				teamClassificationFeaturesDBSCAN.extend([np.int64(x[0]) for x in hist])
-				teamClassificationFeaturesDBSCAN = [float(i)/max(teamClassificationFeaturesDBSCAN) for i in teamClassificationFeaturesDBSCAN]
-			allTeamClassificationFeaturesDBSCAN.append(teamClassificationFeaturesDBSCAN)
-		
-		temp = None
-		
-		all_info.append([i, temp, player_parts, [min_x,min_y]])
-	
-	teamClassifier = KMeans(n_clusters = 2)
-	teamLabels = teamClassifier.fit_predict(allTeamClassificationFeatures)
-	teamClassifierDBSCAN = DBSCAN(eps=0.5, min_samples=2, metric='euclidean').fit(allTeamClassificationFeaturesDBSCAN)
-	teamLabelsDBSCAN = teamClassifierDBSCAN.labels_
+        if 'rightKnee' in list(player_parts.keys()):
+            allXCoords.append(int(player_parts['rightKnee']['x']))
+            allYCoords.append(int(player_parts['rightKnee']['y']))
+            rightLowerPointFound = True
+        if 'leftKnee' in list(player_parts.keys()):
+            allXCoords.append(int(player_parts['leftKnee']['x']))
+            allYCoords.append(int(player_parts['leftKnee']['y']))
+            leftLowerPointFound = True
 
-	isKeeperFound = False
-	isRefFound = False
+        allXCoords.sort()
+        allYCoords.sort()
 
-	dist_from_centroids = []
-	for player_itr in range(len(all_info)):
+        if len(allXCoords) < 3:
+            continue
 
-		dist_from_centroid = np.sqrt(np.sum(np.square(np.array(allTeamClassificationFeatures[player_itr]) - \
-			np.array(teamClassifier.cluster_centers_[teamLabels[player_itr]]))))
-		dist_from_centroids.append(dist_from_centroid)
+        hipPointsFound = 'rightHip' in list(player_parts.keys()) and 'leftHip' in list(player_parts.keys())
+        if hipPointsFound:
+            hipPointsFound &= abs(int(player_parts['leftHip']['y']) - int(player_parts['rightHip']['y'])) > 5
+        if hipPointsFound:
+            allHipXCoords = []
+            allHipYCoords = []
+            allHipXCoords.append(int(player_parts['rightHip']['x']))
+            allHipYCoords.append(int(player_parts['rightHip']['y']))
+            allHipXCoords.append(int(player_parts['leftHip']['x']))
+            allHipYCoords.append(int(player_parts['leftHip']['y']))
+            allHipXCoords.sort()
+            allHipYCoords.sort()
 
-	normed_dist_from_centroids = [float(i)/sum(dist_from_centroids) for i in dist_from_centroids]
-	print('normes dist', normed_dist_from_centroids)
-		
-	for player_itr in range(len(all_info)):
+        if mask[int(min_x), int(min_y)] == 0:
+            continue
 
-		if (teamLabelsDBSCAN[player_itr] == -1):
-			all_info[player_itr][1] = -1
-		else:
-			all_info[player_itr][1] = teamLabels[player_itr]
-			
-	print("ref:", ref_ids,"keeper:", keeper_id, "score", team_class_num)	
-		
-	return all_info, isKeeperFound, isRefFound, image
+        if len(allXCoords) == 4:
+            if 0 > allXCoords[0]:
+                allXCoords[0] = 0
+            if 0 > allXCoords[3]:
+                allXCoords[3] = 0
+            if 0 > allXCoords[0] and 0 > allXCoords[3]:
+                allXCoords[3] = 2
+            if 0 > allYCoords[0]:
+                allYCoords[0] = 0
+            if 0 > allYCoords[3]:
+                allYCoords[3] = 0
+            if 0 > allYCoords[0] and 0 > allYCoords[3]:
+                allYCoords[3] = 2
+            allXCoords.sort()
+            allYCoords.sort()
+            newXLower = int(allXCoords[0] + abs(allXCoords[3] - allXCoords[0]) * 0.4)
+            newXUpper = int(allXCoords[3] - abs(allXCoords[3] - allXCoords[0]) * 0.2)
+            if hipPointsFound:
+                newYLower = int(allHipYCoords[0])
+                newYUpper = int(allHipYCoords[-1])
+            else:
+                newYLower = int(allYCoords[0])
+                newYUpper = int(allYCoords[3])
+            allColors = image2[newXLower:newXUpper, newYLower:newYUpper]
+            allColorsDBSCAN = image2[allXCoords[0]:allXCoords[-1], allYCoords[0]:allYCoords[-1]]
+            image = cv2.rectangle(image, (newYLower, newXLower), (newYUpper, newXUpper), (255, 0, 0), 1)
+            
+            # Lưu khung xương của cầu thủ thành hình ảnh
+            save_skeleton_frame(allXCoords, allYCoords, f"skeleton_frame_player_{i}.jpg")
+            
+            chans = cv2.split(allColors)
+            colors = ("b", "g", "r")
+            for (chan, color) in zip(chans, colors):
+                hist = cv2.calcHist([chan], [0], None, [64], [0, 256])
+                teamClassificationFeatures.extend([np.int64(x[0]) for x in hist])
+                teamClassificationFeatures = [float(i)/max(teamClassificationFeatures) for i in teamClassificationFeatures]
+            allTeamClassificationFeatures.append(teamClassificationFeatures)
+            chans = cv2.split(allColorsDBSCAN)
+            colors = ("b", "g", "r")
+            for (chan, color) in zip(chans, colors):
+                hist = cv2.calcHist([chan], [0], None, [3], [0, 256])
+                teamClassificationFeaturesDBSCAN.extend([np.int64(x[0]) for x in hist])
+                teamClassificationFeaturesDBSCAN = [float(i)/max(teamClassificationFeaturesDBSCAN) for i in teamClassificationFeaturesDBSCAN]
+            allTeamClassificationFeaturesDBSCAN.append(teamClassificationFeaturesDBSCAN)
+
+        if len(allXCoords) == 3:
+            if 0 > allXCoords[0]:
+                allXCoords[0] = 0
+            if 0 > allXCoords[2]:
+                allXCoords[2] = 0
+            if 0 > allXCoords[0] and 0 > allXCoords[2]:
+                allXCoords[2] = 10
+            if 0 > allYCoords[0]:
+                allYCoords[0] = 0
+            if 0 > allYCoords[2]:
+                allYCoords[2] = 0
+            if 0 > allYCoords[0] and 0 > allYCoords[2]:
+                allYCoords[2] = 10
+            allXCoords.sort()
+            allYCoords.sort()
+            newXLower = int(allXCoords[0] + abs(allXCoords[2] - allXCoords[0]) * 0.4)
+            newXUpper = int(allXCoords[2] - abs(allXCoords[2] - allXCoords[0]) * 0.2)
+            if hipPointsFound:
+                newYLower = int(allHipYCoords[0])
+                newYUpper = int(allHipYCoords[-1])
+            else:
+                newYLower = int(allYCoords[0])
+                newYUpper = int(allYCoords[2])
+            allColors = image2[newXLower:newXUpper, newYLower:newYUpper]
+            allColorsDBSCAN = image2[allXCoords[0]:allXCoords[-1], allYCoords[0]:allYCoords[-1]]
+            image = cv2.rectangle(image, (newYLower, newXLower), (newYUpper, newXUpper), (255, 0, 0), 1)
+            
+            # Lưu khung xương của cầu thủ thành hình ảnh
+            save_skeleton_frame(allXCoords, allYCoords, f"skeleton_frame_player_{i}.jpg")
+            
+            chans = cv2.split(allColors)
+            colors = ("b", "g", "r")
+            for (chan, color) in zip(chans, colors):
+                hist = cv2.calcHist([chan], [0], None, [64], [0, 256])
+                teamClassificationFeatures.extend([np.int64(x[0]) for x in hist])
+                teamClassificationFeatures = [float(i)/max(teamClassificationFeatures) for i in teamClassificationFeatures]
+            allTeamClassificationFeatures.append(teamClassificationFeatures)
+            chans = cv2.split(allColorsDBSCAN)
+            colors = ("b", "g", "r")
+            for (chan, color) in zip(chans, colors):
+                hist = cv2.calcHist([chan], [0], None, [3], [0, 256])
+                teamClassificationFeaturesDBSCAN.extend([np.int64(x[0]) for x in hist])
+                teamClassificationFeaturesDBSCAN = [float(i)/max(teamClassificationFeaturesDBSCAN) for i in teamClassificationFeaturesDBSCAN]
+            allTeamClassificationFeaturesDBSCAN.append(teamClassificationFeaturesDBSCAN)
+
+        if len(allXCoords) == 2:
+            if 0 > allXCoords[0]:
+                allXCoords[0] = 0
+            if 0 > allXCoords[1]:
+                allXCoords[1] = 0
+            if 0 > allXCoords[0] and 0 > allXCoords[1]:
+                allXCoords[1] = 2
+            if 0 > allYCoords[0]:
+                allYCoords[0] = 0
+            if 0 > allYCoords[1]:
+                allYCoords[1] = 0
+            if 0 > allYCoords[0] and 0 > allYCoords[1]:
+                allYCoords[1] = 2
+            allXCoords.sort()
+            allYCoords.sort()
+            newXLower = int(allXCoords[0] + abs(allXCoords[1] - allXCoords[0]) * 0.35)
+            newXUpper = int(allXCoords[1] * 0.9)
+            allColors = image2[newXLower:newXUpper, allYCoords[0]:allYCoords[1]]
+            allColorsDBSCAN = image2[allXCoords[0]:allXCoords[1], allYCoords[0]:allYCoords[1]]
+            image = cv2.rectangle(image, (allYCoords[0], int(allXCoords[0] + abs(allXCoords[1] - allXCoords[0]) * 0.35)), (allYCoords[1], allXCoords[1]), (255, 0, 0), 1)
+            
+            # Lưu khung xương của cầu thủ thành hình ảnh
+            save_skeleton_frame(allXCoords, allYCoords, f"skeleton_frame_player_{i}.jpg")
+            
+            chans = cv2.split(allColors)
+            colors = ("b", "g", "r")
+            for (chan, color) in zip(chans, colors):
+                hist = cv2.calcHist([chan], [0], None, [3], [0, 256])
+                teamClassificationFeatures.extend([np.int64(x[0]) for x in hist])
+                teamClassificationFeatures = [float(i)/max(teamClassificationFeatures) for i in teamClassificationFeatures]
+            allTeamClassificationFeatures.append(teamClassificationFeatures)
+            chans = cv2.split(allColorsDBSCAN)
+            colors = ("b", "g", "r")
+            for (chan, color) in zip(chans, colors):
+                hist = cv2.calcHist([chan], [0], None, [3], [0, 256])
+                teamClassificationFeaturesDBSCAN.extend([np.int64(x[0]) for x in hist])
+                teamClassificationFeaturesDBSCAN = [float(i)/max(teamClassificationFeaturesDBSCAN) for i in teamClassificationFeaturesDBSCAN]
+            allTeamClassificationFeaturesDBSCAN.append(teamClassificationFeaturesDBSCAN)
+
+        temp = None
+        all_info.append([i, temp, player_parts, [min_x, min_y]])
+
+    teamClassifier = KMeans(n_clusters=2)
+    teamLabels = teamClassifier.fit_predict(allTeamClassificationFeatures)
+    teamClassifierDBSCAN = DBSCAN(eps=0.5, min_samples=2, metric='euclidean').fit(allTeamClassificationFeaturesDBSCAN)
+    teamLabelsDBSCAN = teamClassifierDBSCAN.labels_
+
+    isKeeperFound = False
+    isRefFound = False
+
+    dist_from_centroids = []
+    for player_itr in range(len(all_info)):
+        dist_from_centroid = np.sqrt(np.sum(np.square(np.array(allTeamClassificationFeatures[player_itr]) -
+                                                      np.array(teamClassifier.cluster_centers_[teamLabels[player_itr]]))))
+        dist_from_centroids.append(dist_from_centroid)
+
+    normed_dist_from_centroids = [float(i) / sum(dist_from_centroids) for i in dist_from_centroids]
+    print('normed dist', normed_dist_from_centroids)
+
+    for player_itr in range(len(all_info)):
+        if teamLabelsDBSCAN[player_itr] == -1:
+            all_info[player_itr][1] = -1
+        else:
+            all_info[player_itr][1] = teamLabels[player_itr]
+
+    print("ref:", ref_ids, "keeper:", keeper_id, "score", team_class_num)
+
+    return all_info, isKeeperFound, isRefFound, image
+
+def save_skeleton_frame(allXCoords, allYCoords, output_path):
+    skeleton_image = np.zeros((image2.shape[0], image2.shape[1], 3), dtype=np.uint8)
+    for i in range(len(allXCoords)):
+        if i < len(allXCoords) - 1:
+            cv2.line(skeleton_image, (allYCoords[i], allXCoords[i]), (allYCoords[i + 1], allXCoords[i + 1]), (255, 0, 0), 2)
+    cv2.imwrite(output_path, skeleton_image)
+
+
