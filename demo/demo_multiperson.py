@@ -238,7 +238,7 @@ def return_pose(image, image2, keeper, referee):
             image = cv2.rectangle(image, (newYLower, newXLower), (newYUpper, newXUpper), (255, 0, 0), 1)
             
             # Lưu khung xương của cầu thủ thành hình ảnh
-            save_skeleton_frame(allXCoords, allYCoords, f"skeleton_frame_player_{i}.jpg")
+            save_skeleton_frame(allXCoords, allYCoords, f"skeleton_frame_player_{i}.jpg",image2)
             
             chans = cv2.split(allColors)
             colors = ("b", "g", "r")
@@ -283,7 +283,7 @@ def return_pose(image, image2, keeper, referee):
             image = cv2.rectangle(image, (newYLower, newXLower), (newYUpper, newXUpper), (255, 0, 0), 1)
             
             # Lưu khung xương của cầu thủ thành hình ảnh
-            save_skeleton_frame(allXCoords, allYCoords, f"skeleton_frame_player_{i}.jpg")
+            save_skeleton_frame(allXCoords, allYCoords, f"skeleton_frame_player_{i}.jpg",image2)
             
             chans = cv2.split(allColors)
             colors = ("b", "g", "r")
@@ -322,7 +322,7 @@ def return_pose(image, image2, keeper, referee):
             image = cv2.rectangle(image, (allYCoords[0], int(allXCoords[0] + abs(allXCoords[1] - allXCoords[0]) * 0.35)), (allYCoords[1], allXCoords[1]), (255, 0, 0), 1)
             
             # Lưu khung xương của cầu thủ thành hình ảnh
-            save_skeleton_frame(allXCoords, allYCoords, f"skeleton_frame_player_{i}.jpg")
+            save_skeleton_frame(allXCoords, allYCoords, f"skeleton_frame_player_{i}.jpg",image2)
             
             chans = cv2.split(allColors)
             colors = ("b", "g", "r")
@@ -369,7 +369,7 @@ def return_pose(image, image2, keeper, referee):
 
     return all_info, isKeeperFound, isRefFound, image
 
-def save_skeleton_frame(allXCoords, allYCoords, output_path):
+def save_skeleton_frame(allXCoords, allYCoords, output_path,image2):
     skeleton_image = np.zeros((image2.shape[0], image2.shape[1], 3), dtype=np.uint8)
     for i in range(len(allXCoords)):
         if i < len(allXCoords) - 1:
