@@ -133,7 +133,6 @@ def return_pose(image, image2, keeper, referee):
     detections = extract_detections(cfg, scmap, locref, pairwise_diff)
     unLab, pos_array, unary_array, pwidx_array, pw_array = eval_graph(sm, detections)
     person_conf_multi = get_person_conf_multicut(sm, unLab, unary_array, pos_array)
-    cv2.imwrite('person_conf_multi.jpg', person_conf_multi)
 
     names = {6: 'rightShoulder', 5: 'leftShoulder', 11: 'leftHip', 12: 'rightHip',
              14: 'rightKnee', 13: 'leftKnee', 16: 'rightAnkle', 15: 'leftAnkle'}
