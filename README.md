@@ -4,7 +4,7 @@
   - [Thành viên nhóm:](#thành-viên-nhóm)
   - [Mô tả:](#mô-tả)
   - [Giải thuật](#giải-thuật)
-  - [Run bằng Google Colab](#run-bằng-google-colab)
+  - [Google Colab](#google-colab)
   - [Run](#run)
   - [Tài liệu tham khảo:](#tài-liệu-tham-khảo)
 ## Thành viên nhóm:
@@ -36,7 +36,7 @@ Phát hiện việt vị là một phần quan trọng trong mỗi trận đấu
 
 ![](images/25_1_final.jpg)
 *Các cầu thủ tấn công được gán nhãn ON hoặc OFF với OFF là cầu thủ đang phạm lỗi việt vị Cầu thủ phòng ngự cuối được gán nhãn last man*
-## Run bằng Google Colab
+## Google Colab
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](....)
 
 ## Run
