@@ -37,7 +37,7 @@ Phát hiện việt vị là một phần quan trọng trong mỗi trận đấu
 ![](images/25_1_final.jpg)
 *Các cầu thủ tấn công được gán nhãn ON hoặc OFF với OFF là cầu thủ đang phạm lỗi việt vị Cầu thủ phòng ngự cuối được gán nhãn last man*
 ## Google Colab
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](....)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1SR3bBqcDnYhNZ_dszJZDorJxyBIrSl0C?usp=sharing)
 
 ## Run
 1. Sử dụng môi trường Conda để cài đặt các package cần thiết.
