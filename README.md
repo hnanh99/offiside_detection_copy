@@ -51,7 +51,7 @@ Phát hiện việt vị là một phần quan trọng trong mỗi trận đấu
 ## Chú thích các thư mục
 Đường dẫn dữ liệu đầu vào và đầu ra là các hình ảnh của từng quy trình
 1. Đầu vào: ```./Offside_detection_dataset/Offside_Images```
-2. Đầu ra của từng quy trình: 
+2. Đầu ra của từng quy trình:\
 Hình ảnh xác định đường biên ngang: ```./Offside_detection_dataset/results/vp```\
 Vùng quan tâm để xác định đội: ```./Offside_detection_dataset/results/sub```\
 Xác định cầu thủ trong sân: ```./Offside_detection_dataset/results/pe```\
