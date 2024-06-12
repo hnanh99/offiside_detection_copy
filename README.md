@@ -4,8 +4,9 @@
   - [Thành viên nhóm:](#thành-viên-nhóm)
   - [Mô tả:](#mô-tả)
   - [Giải thuật](#giải-thuật)
-  - [Google Colab](#google-colab)
-  - [Run](#run)
+  - [Run in Colab](#run-in-colab)
+  - [Run in system](#run-in-system)
+  - [Chú thích các thư mục](#chú-thích-các-thư-mục)
   - [Tài liệu tham khảo:](#tài-liệu-tham-khảo)
 ## Thành viên nhóm:
 |STT|Tên|MSSV|
@@ -36,10 +37,10 @@ Phát hiện việt vị là một phần quan trọng trong mỗi trận đấu
 
 ![](images/25_1_final.jpg)
 *Các cầu thủ tấn công được gán nhãn ON hoặc OFF với OFF là cầu thủ đang phạm lỗi việt vị Cầu thủ phòng ngự cuối được gán nhãn last man*
-## Google Colab
+## Run in Colab
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1SR3bBqcDnYhNZ_dszJZDorJxyBIrSl0C?usp=sharing)
 
-## Run
+## Run in system
 1. Sử dụng môi trường Conda để cài đặt các package cần thiết.
 
     ```conda env create -f environment. yml```
@@ -47,7 +48,15 @@ Phát hiện việt vị là một phần quan trọng trong mỗi trận đấu
 2. Chạy file  ```main.py```. Kết quả đầu ra xuất hiện trong folder hình ảnh kết quả.
 
     ``` python3 main.py ```
-
+## Chú thích các thư mục
+Đường dẫn dữ liệu đầu vào và đầu ra là các hình ảnh của từng quy trình
+1. Đầu vào: ```./Offside_detection_dataset/Offside_Images```
+2. Đầu ra của từng quy trình: 
+Hình ảnh xác định đường biên ngang: ```./Offside_detection_dataset/results/vp```
+Vùng quan tâm để xác định đội: ```./Offside_detection_dataset/results/sub```
+Xác định cầu thủ trong sân: ```./Offside_detection_dataset/results/pe```
+Xác định đội của mỗi cầu thủ: ```./Offside_detection_dataset/results/tc```
+Phát hiện việt vị: ```./Offside_detection_dataset/results/final```
 
 ## Tài liệu tham khảo:
 [A Dataset & Methodology for Computer Vision based Offside Detection in Soccer](https://dl.acm.org/doi/10.1145/3422844.3423055)
